@@ -8,7 +8,7 @@ dotenv.config({ path: ['.env.local', '.env'] });
 const databaseURI = process.env.DATABASE_URL;
 
 if (databaseURI === undefined) {
-  console.log('You need to provide the database URI');
+  console.log('Database URI was undefined.');
   process.exit(0);
 }
 
