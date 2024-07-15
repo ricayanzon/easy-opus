@@ -15,6 +15,13 @@
       "when": 1720908918555,
       "tag": "0001_mighty_microbe",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1721002033175,
+      "tag": "0002_motionless_gravity",
+      "breakpoints": true
     }
   ]
 }

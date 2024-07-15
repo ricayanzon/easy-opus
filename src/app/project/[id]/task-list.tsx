@@ -1,14 +1,15 @@
 'use client'
 
-import { insertTask } from "@/db/actions";
-import { Task } from "@/types";
+import { deleteTask, insertTask } from "@/db/actions";
+import { Task as TaskType } from "@/types";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { NewTaskModal } from "./new-task-modal";
+import { Task } from "./task";
 
 interface TaskListProps {
   projectId: number,
-  tasks: Task[],
+  tasks: TaskType[],
 }
 
 export function TaskList({ projectId, tasks }: TaskListProps) {
@@ -16,11 +17,15 @@ export function TaskList({ projectId, tasks }: TaskListProps) {
 
   const router = useRouter();
 
-  async function handleNewTask(title: string, description: string) {
-    
+  const handleNewTask = async (title: string, description: string) => {
     await insertTask(title, description, projectId);
     setShowNewTaskModal(false);
     router.refresh();
+  }
+
+  const onDeleteTask = async (taskId: number) => {
+    await deleteTask(taskId)
+    router.refresh()
   }
 
   return (
@@ -32,16 +37,14 @@ export function TaskList({ projectId, tasks }: TaskListProps) {
         Add New Task
       </button>
       <div className="my-8 mx-auto w-full max-w-2xl">
-        {tasks.map((task) => (
-          <div
-            key={task.id}
-            className="flex flex-col bg-white p-4 rounded-lg shadow-md mb-4 hover:shadow-lg transition-shadow duration-200 ease-in-out"
-          >
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">{task.title}</h3>
-            <p className="text-gray-600 mb-4">{task.description}</p>
-            <p className="text-sm text-blue-500">{task.status}</p>
-          </div>
-        ))}
+        {tasks.length > 0
+          ? tasks.map((task) => (
+              <Task
+                key={task.id}
+                initialTask={task}
+                onDelete={onDeleteTask} />
+            ))
+          : <h1>No tasks found for this project. Add your first task to see it here.</h1>}
       </div>
       {showNewTaskModal && (
         <NewTaskModal onSubmit={handleNewTask} onClose={() => setShowNewTaskModal(false)} />

@@ -1,26 +1,21 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type ChangeEvent } from "react";
+import { useClickOutside } from "@/hooks";
+import { useEffect, useState, type FormEvent, type ChangeEvent, useRef } from "react";
 
-interface FormElements extends HTMLFormControlsCollection {
-  title: HTMLInputElement;
-  description: HTMLInputElement;
-}
-
-interface TaskFormElement extends HTMLFormElement {
-  readonly elements: FormElements;
-}
-
-export function NewTaskModal({
-  onClose,
-  onSubmit,
-}: {
-  onClose: () => void;
+interface NewTaskModalProps {
   onSubmit: (title: string, description: string) => Promise<void>;
-}) {
+  onClose: () => void;
+}
+
+// TODO: this component shares a lot with NewProjectModal -> abstract into own parent component and inject content
+export function NewTaskModal({ onSubmit, onClose }: NewTaskModalProps) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [isValidTask, setIsValidTask] = useState(false)
+
+  const modalRef = useRef<HTMLDivElement>(null)
+  useClickOutside(modalRef, onClose)
 
   useEffect(() => {
     const isValidTitle = title.trim().length > 0
@@ -28,7 +23,7 @@ export function NewTaskModal({
     setIsValidTask(isValidTitle && isValidDescription)
   }, [title, description])
 
-  const handleSubmit = async (event: FormEvent<TaskFormElement>) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (isValidTask) {
       await onSubmit(title, description);
@@ -39,7 +34,9 @@ export function NewTaskModal({
   const onDescriptionInput = (event: ChangeEvent<HTMLInputElement>) => setDescription(event.target.value)
 
   return (
-    <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center px-4">
+    <div
+      ref={modalRef}
+      className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center px-4">
       <div className="relative w-full max-w-md bg-white p-6 rounded-lg shadow-lg">
         <button
           onClick={onClose}

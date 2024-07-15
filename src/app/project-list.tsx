@@ -1,14 +1,15 @@
 'use client';
 
-import { insertProject } from "@/db/actions";
-import { Project } from "@/types";
+import { insertProject, deleteProject } from "@/db/actions";
+import { Project as ProjectType } from "@/types";
 import { useRouter } from "next/navigation";
 import { NewProjectModal } from "./new-project-modal";
 import { useState } from 'react'
+import { Project } from "./project";
 
 interface ProjectListProps {
   userId: string,
-  projects: Project[]
+  projects: ProjectType[]
 }
 
 export function ProjectList({ userId, projects }: ProjectListProps) {
@@ -16,10 +17,15 @@ export function ProjectList({ userId, projects }: ProjectListProps) {
 
   const [showModal, setShowModal] = useState(false);
 
-  async function handleNewProject(name: string) {
+  const onCreateProject = async (name: string) => {
     await insertProject(userId, name);
     setShowModal(false);
     router.refresh();
+  }
+
+  const onDeleteProject = async (projectId: number) => {
+    await deleteProject(userId, projectId)
+    router.refresh()
   }
 
   return (
@@ -33,18 +39,15 @@ export function ProjectList({ userId, projects }: ProjectListProps) {
       
       <div className="my-8 mx-auto w-full max-w-2xl">
         {projects.map((project) => (
-          <div
+          <Project
             key={project.id}
-            className="flex items-center justify-between bg-white p-4 rounded-lg shadow-md mb-4 hover:shadow-lg transition-shadow duration-200 ease-in-out">
-            <span className="text-lg font-semibold text-gray-800 hover:text-blue-500 transition-colors duration-150 ease-in-out">
-              {project.name}
-            </span>
-          </div>
+            project={project}
+            onDelete={onDeleteProject} />
         ))}
       </div>
 
       {showModal && (
-        <NewProjectModal onSubmit={handleNewProject} onClose={() => setShowModal(true)} />
+        <NewProjectModal onSubmit={onCreateProject} onClose={() => setShowModal(false)} />
       )}
     </div>
   );

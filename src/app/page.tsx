@@ -10,9 +10,6 @@ export default async function Home() {
   const { userId } = auth();
 
   if (!userId) {
-    // TODO: return to sign in page, if this is moved into somewhere
-    // else, check that userId is never empty
-    // -> maybe move userId to own file for that
     return (
       <div className="flex justify-center items-center h-screen">
         <SignIn />
@@ -22,5 +19,9 @@ export default async function Home() {
 
   const projects = await db.select().from(projectTable).where(eq(projectTable.userId, userId));
 
-  return <ProjectList userId={userId} projects={projects} />;
+  if (projects.length > 0) {
+    return <ProjectList userId={userId} projects={projects} />;
+  }
+
+  return <h1>No projects found, add your first to see it here.</h1>
 }
